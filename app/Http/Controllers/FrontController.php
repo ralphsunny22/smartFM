@@ -154,17 +154,23 @@ class FrontController extends Controller
         ]);
         $data = $request->all();
 
-        $data = $request->all();
-        $myFile = MyFile::find($data['file_id']);
-        $folderPath = $myFile->folder->path_by_slug;
-        $oldPath = $folderPath.'/'.$myFile->title;
-        $newPath = $folderPath.'/'.$data['file_title'].'/'.$myFile->type;
+         $myFile = MyFile::find($data['file_id']);
+         $type = (string) $myFile->type; //'jpg'
+
+         $folderPath = (string) $myFile->folder->path_by_slug; //'ugo-sunday-2', img location
+        $oldFileTitle = (string) $myFile->title;
+          $oldPath = $folderPath.'/'.$oldFileTitle; //'ugo-sunday-2/165346088123232-323329_fashion-.....png'
+
+         $newFileTitle = (string) $data['file_title'];
+         $newPath = $folderPath.'/'.$newFileTitle.'.'.$type; //'ugo-sunday-2/lady.jpg'
 
         //name in storage
         Storage::disk('public')->move($oldPath, $newPath);
 
+        $new_title = $data['file_title'].'.'.$myFile->type; //;lady.jpg
+
         //update file
-        $myFile->title = $data['file_title'];
+        $myFile->title = $new_title;
         $myFile->original_name = $data['file_title'];
         $myFile->save();
 

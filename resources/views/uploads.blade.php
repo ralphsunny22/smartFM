@@ -192,7 +192,7 @@
                                             data-caption="{{ isset($item->original_name) ? $item->original_name : 'no caption'  }}"
                                         >Preview</a>
                                         <a href="javascript:void(0)" class="renameFile"
-                                            onclick="renameFileDisplay('{{$item->id}}', '{{ isset($item->original_name) ? $item->original_name : ''}}')">Rename</a>
+                                            onclick="renameFileDisplay('{{$item->id}}', '{{ $item->original_name }}')">Rename</a>
                                         <a href="">move</a>
                                         <a href="">Remove</a>
                                     </div>
@@ -255,7 +255,7 @@
         <div class="close">+</div>
         <h6>Rename file</h6>
         <form action="{{ route('renameFile') }}"  method="POST">@csrf
-            <input type="text" name="file_title" class="form-control title" id="file_title" placeholder="Folder name" value="">
+            <input type="text" name="file_title" class="form-control file_title" id="file_title" placeholder="File name" value="">
             <input type="hidden" class="file_id" name="file_id" value="">
             <button type="submit" class="pull-right">Submit</button>
         </form>
@@ -307,14 +307,14 @@
    })
 
    //rename folder
-   function renameFolderDisplay ($folder_id="", $folder_old_title=""){
+   function renameFolderDisplay ($folder_id="", $folder_old_title=null){
         $('.renameFolder').css({'display':'flex'});
         if($folder_id != "") {
             // $path = $(this).attr("data-path")
             $('#title').val($folder_old_title)
             $('.bg-modal .save_path').val($folder_id)
         } 
-    }
+   }
 
     //rename file
    function renameFileDisplay ($file_id="", $file_old_title=""){
@@ -322,10 +322,12 @@
         if($file_id != "") {
             $('.renameFile .file_id').val($file_id)
         } 
-        if($file_old_title != "") {
+        if($file_old_title != null) {
             $('.renameFile .file_title').val($file_old_title)
         } 
-    }
+
+
+   }
 </script>
 
 <script>
