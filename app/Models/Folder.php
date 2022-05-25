@@ -18,7 +18,13 @@ class Folder extends Model
         return $this->hasMany(Folder::class, 'parent_id', 'id'); //mapping folders to its 'parent_id'
     }
 
+    public function myFiles(){
+        return $this->belongsTo(MyFile::class);
+    }
+
     public function user(){
         return $this->belongsTo(User::class);
     }
+
+
 }

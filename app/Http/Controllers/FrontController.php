@@ -94,9 +94,13 @@ class FrontController extends Controller
         ]);
         $data = $request->all();
 
+        //main folder
         if (empty($data['save_path'])) {
             $parentFolder = Folder::where(['created_by'=>$user->id, 'title'=>'Main'])->first();
         }
+
+        //sub-folder
+        $parentFolder = Folder::find($data['save_path']);
 
         $slug = Str::slug($data['title']);
         $slugPath = $parentFolder->path_by_slug.'/'.$slug;
@@ -117,10 +121,13 @@ class FrontController extends Controller
 
     }
 
+    //all user folders and files
     public function uploads()
     {
         $user = auth()->user();
-        $folders = $user->folders()->where('parent_id', '!=', NULL)->get();
+        $user_main_folder = Folder::where(['created_by'=>$user->id, 'parent_id'=>NULL])->first();
+
+        $folders = $user_main_folder->folders;
         $files = $user->myFiles;
 
         //merger array, sort by latest
@@ -131,8 +138,19 @@ class FrontController extends Controller
         return view('uploads', compact('mergedItems'));
     }
 
-    
-    
+    public function singleFolder($id)
+    {
+        $folder = Folder::find($id);
+        $subfolders = $folder->folders;
+        $files = $folder->myFiles;
+
+        $collection = collect([$subfolders, $files]);
+        $mergedItems = $collection->collapse();
+        $mergedItems = $mergedItems->SortByDesc('created_at');
+        return view('singleFolder', compact('mergedItems', 'folder'));  
+    }
+
+    //save files from dropzone
     public function uploadsPost(Request $request)
     {
         $user = auth()->user();

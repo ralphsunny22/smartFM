@@ -67,7 +67,7 @@
           <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
         </symbol>
       </svg>
-    <div class="alert alert-primary alert-dismissible d-flex align-items-center mt-4" role="alert">
+    <div class="alert alert-primary alert-dismissible d-flex align-items-center mt-4 d-none" role="alert">
         <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Info:"><use xlink:href="#info-fill"/></svg>
         <div>
           By default, all uploaded files are stored in your root folder. To save in a another folder(subfolder),
@@ -81,47 +81,8 @@
     <div class="height-100 bg-light">
         
         <div class="upload-main">
-            <h5>Main Components</h5>
-            <div class="row row-cols-1 row-cols-md-4 g-4 d-none">
-                <div class="col">
-                    <div class="card h-100">
-                    
-                    <div class="card-body text-center">
-                        <h6 class="card-title">Card title</h6>
-                        <p class="card-text">This is a short card.</p>
-                    </div>
-                    </div>
-                </div>
-
-                <div class="col">
-                <div class="card h-100">
-                    
-                    <div class="card-body text-center">
-                    <h6 class="card-title">Card title</h6>
-                    <p class="card-text">This is a short card.</p>
-                    </div>
-                </div>
-                </div>
-                <div class="col">
-                <div class="card h-100">
-                
-                    <div class="card-body text-center">
-                    <h6 class="card-title">Card title</h6>
-                    <p class="card-text">This is a short card.</p>
-                    </div>
-                </div>
-                </div>
-                <div class="col">
-                <div class="card h-100">
-                    
-                    <div class="card-body text-center">
-                    <h6 class="card-title">Card title</h6>
-                    <p class="card-text">This is a short card.</p>
-                    </div>
-                </div>
-                </div>
-            </div>
-
+            <h5>{{ $folder->path_by_title }}</h5>
+            
             <form method="post" action="{{ route('uploadsPost') }}"
                 enctype="multipart/form-data" class="dropzone" id="my-great-dropzone">@csrf
                 <div class="dz-message" data-dz-message>
@@ -130,7 +91,7 @@
                     </div>
                     <h4 class="message">Click or Drop files here to upload</h4>
                 </div>
-                <input type="hidden" name="store_path" value="">
+                <input type="hidden" name="store_path" value="{{ $folder->id }}">
             </form> 
 
             <div class="file-validate">
@@ -140,7 +101,7 @@
 
             <div class="mt-5">
                 <div class="folder-nav">
-                    <h6>All Folders</h6>
+                    <h6>All contents</h6>
                     <button class="add-folder" type="button" style="font-weight: 900" onclick="modalDisplay()">
                         <i class='bx bx-plus' id="header-toggle"></i>
                         Add folder
@@ -165,7 +126,8 @@
                                     <div class="file-actions-content">
                                         <a href="{{ route('singleFolder', $item->id) }}">Open</a>
                                         <a href="">Rename</a>
-                                        <a href="javascript:void(0)" class="add-folder" onclick="modalDisplay('{{$item->id}}')">+folder</a>
+                                        <a href="javascript:void(0)" class="add-folder"
+                                            onclick="modalDisplay('{{$item->id}}')">+folder</a>
                                         <a href="">Remove</a>
                                     </div>
                                 </div>
@@ -250,24 +212,7 @@
 <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
 
 <script>
-    //     $(document).ready( function () {
-    //         var options = {
-    //             html: true,
-    //             title: "Optional: HELLO(Will overide the default-the inline title)",
-    //             //html element
-    //             //content: $("#popover-content")
-    //             content: $('[data-name="popover-content"]')
-    //             //Doing below won't work. Shows title only
-    //             //content: $("#popover-content").html()
-
-    //         }
-    //         var popoverTriggerEl = document.getElementById('popover-trigger')
-    //         var popover = new bootstrap.Popover(popoverTriggerEl, options)
-    // });
-</script>
-
-<script>
-    //save_path is an id value;
+    //save_path is id value
     function modalDisplay ($save_path=""){
         $('.bg-modal').css({'display':'flex'});
         if($save_path != "") {
