@@ -17,6 +17,45 @@
         align-items: center;
         justify-content: space-between;
     }
+
+    .each_folder{
+        width: 100px;
+        height: 100px;
+    }
+    .folder-image{
+        max-width: 100%;
+        max-height: 100%;
+        border-radius: 5%;
+    }
+
+    .file-actions {
+        width: 125px;
+        height: 120px;
+        border: 1px solid grey;
+        position: absolute;
+        top: -70px;
+        left: 70px;
+        z-index: 9;
+        background-color: white;
+        border-radius: 5px;
+        padding: 5px;
+        display: none;
+    }
+
+    .file-actions .file-actions-content{
+        width: 50%;
+        height: 50%;
+        margin: auto;
+    }
+
+    .file-actions .file-actions-content a{
+        display: block;
+        margin-bottom: 5px;
+        color: #000;
+
+    }
+
+    
 </style>
 @endsection
 
@@ -83,15 +122,17 @@
                 </div>
             </div>
 
-            <form method="post" action="{{url('image/upload/store')}}" enctype="multipart/form-data" class="dropzone" id="dropzone">@csrf
+            <form method="post" action="{{ route('uploadsPost') }}"
+                enctype="multipart/form-data" class="dropzone" id="my-great-dropzone">@csrf
                 <div class="dz-message" data-dz-message>
                     <div class="icon">
                         <i class="bx bx-file" style="font-size: 24px;"></i>
                     </div>
                     <h4 class="message">Click or Drop files here to upload</h4>
-                    
                 </div>
+                <input type="hidden" name="store_path" value="">
             </form> 
+
             <div class="file-validate">
                 <span class="pull-left"><strong>Allowed extensions: .jpeg, .jpg, .png, .gif, .pdf, .docx, .xlx</strong></span>
                 <span class="pull-right"><strong>Maximum file upload: 5MB</strong></span>
@@ -100,31 +141,109 @@
             <div class="mt-5">
                 <div class="folder-nav">
                     <h6>All Folders</h6>
-                    <button class="add-folder" type="button" style="font-weight: 900"><i class='bx bx-plus' id="header-toggle"></i> Add folder</button>
+                    <button class="add-folder" type="button" style="font-weight: 900">
+                        <i class='bx bx-plus' id="header-toggle"></i>
+                        Add folder
+                    </button>
                 </div>
                 
+                @if ($mergedItems->count() > 0)
                 <div class="upload_folders">
-                    <div class="each_folder">
-                        <div class="mb-1"><i class="bx bx-folder"></i></div>
-                        <p class="subs">Subs: 1</p>
-                        <span class="title">Images</span>
-                    </div>
 
-                    <div class="each_folder p-2">
+                    @foreach ($mergedItems as $item)
+
+                        @php
+                            $uniq = $item->unique_key;
+                        @endphp
+                        @if ($item->type == 'folder') 
+                            <div class="each_folder" onclick="showFileActions('{{ $uniq }}')">
+                                <div class="mb-1"><i class="bx bx-folder"></i></div>
+                                <p class="subs">Subs: 1</p>
+                                <span class="title">Images</span>
+
+                                <div id="{{ $uniq }}" class="file-actions">
+                                    <div class="file-actions-content">
+                                        <a href="">Open</a>
+                                        <a href="">Rename</a>
+                                        <a href="">move</a>
+                                        <a href="">Remove</a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        @endif
+                        
+                        
+                        @if ($item->type == 'jpg')
+                            <div class="each_folder" onclick="showFileActions('{{ $uniq }}')">
+                                <img src="{{ asset('storage/'.$item->folder->path_by_slug.'/'.$item->title) }}" alt="" class="folder-image">
+                                <div id="{{ $uniq }}" class="file-actions">
+                                    <div class="file-actions-content">
+                                        <a href="">View</a>
+                                        <a href="">Rename</a>
+                                        <a href="">move</a>
+                                        <a href="">Remove</a>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                    @endforeach
+
+                    {{-- <div class="each_folder">
                         <div class="mb-1"><i class="bx bx-folder"></i></div>
                         <p class="subs">Subs: 2</p>
                         <span class="title">Images</span>
+                    </div> --}}
+
+                    
+
+                    
+
+                    <div class="each_folder">
+                        <img src="/assets/images/img1.jpg" alt="" class="folder-image">
+                        
                     </div>
 
+                    <div class="each_folder">
+                        <img src="/assets/images/img1.jpg" alt="" class="folder-image">
+                    </div>
                     
 
                 
                 </div>
+
+                @else
+                    <div class="upload_folders">
+                        No contents
+                    </div>
+                @endif
+                
+
             </div>
         </div>
     </div>
-    <!--Container Main end-->
+
+<!-- Modal -->
+<div class="bg-modal">
+    <div class="modal-content p-5">
+        <div class="close">+</div>
+        <h6>New folder</h6>
+        <form action="{{ route('createfolder') }}"  method="POST">@csrf
+            <input type="text" name="title" class="form-control" id="" placeholder="Folder name">
+            <button type="submit" class="pull-right">Submit</button>
+        </form>
+
+        <input type="hidden" name="save_path" value="">
+
+        <div class="save-path mt-3">
+            <p>Save path: /Main</p>
+        </div>
+    </div>
     
+</div>
+
+<!--Container Main end-->
+
 @endsection
 
 @section('extra_js')
@@ -133,12 +252,42 @@
 
 <script>
     $(document).ready( function () {
-    $('#myTable').DataTable();
-} );
+        var options = {
+            html: true,
+            title: "Optional: HELLO(Will overide the default-the inline title)",
+            //html element
+            //content: $("#popover-content")
+            content: $('[data-name="popover-content"]')
+            //Doing below won't work. Shows title only
+            //content: $("#popover-content").html()
+
+        }
+        var popoverTriggerEl = document.getElementById('popover-trigger')
+        var popover = new bootstrap.Popover(popoverTriggerEl, options)
+});
 </script>
 
+<script>
+    $(".add-folder").click(function(){
+        $('.bg-modal').css({'display':'flex'});
+    })
+    $(".close").click(function(){
+        $('.bg-modal').css({'display':'none'});
+   })
+</script>
+
+<script>
+    function showFileActions(uniq) {
+        $('#'+uniq).toggle();
+    }
+    // $('.each_folder').click(function(e) {
+    //     $('.file-actions').toggle();
+    // });
+</script>
+
+<!--dropZone-->
 <script type="text/javascript">
-    Dropzone.options.dropzone =
+    Dropzone.options.myGreatDropzone  =
      {
         maxFilesize: 12,
         renameFile: function(file) {
@@ -157,7 +306,11 @@
         {
            return false;
         }
-};
+    };
+
+
 </script>
+
+
 @endsection
 

@@ -22,6 +22,9 @@
     @yield('content')
 
     <!--Content Main end-->
+
+    
+    
     </body>
 </html>
 

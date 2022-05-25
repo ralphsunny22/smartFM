@@ -15,9 +15,17 @@ return new class extends Migration
     {
         Schema::create('folders', function (Blueprint $table) {
             $table->id();
+            $table->string('unique_key');
             $table->string('title');
+            $table->string('slug');
             $table->unsignedBigInteger('created_by');
-            $table->unsignedBigInteger('parent_id')->nullbale();
+            $table->unsignedBigInteger('parent_id')->nullable();
+
+            $table->longText('path_by_slug');
+            $table->longText('path_by_title');
+
+            $table->string('type')->default('folder'); //will differentiate folder and files in frontend
+            
             $table->boolean('status')->default(true);
             $table->timestamps();
         });

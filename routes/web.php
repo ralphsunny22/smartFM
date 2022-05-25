@@ -26,3 +26,6 @@ Route::get('/files', [App\Http\Controllers\FrontController::class, 'userFiles'])
 Route::get('/uploads', [App\Http\Controllers\FrontController::class, 'uploads'])->name('uploads');
 Route::post('/uploads', [App\Http\Controllers\FrontController::class, 'uploadsPost'])->name('uploadsPost');
 
+//add folder
+Route::post('/createfolder', [App\Http\Controllers\FrontController::class, 'createfolder'])->name('createfolder');
+

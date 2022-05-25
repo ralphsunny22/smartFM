@@ -6,7 +6,12 @@ use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+
 use App\Models\User;
+use App\Models\Folder;
+use App\Models\MyFile;
 
 class FrontController extends Controller
 {
@@ -17,6 +22,7 @@ class FrontController extends Controller
      */
     public function dashboard()
     {
+        // return $user = auth()->user();
         return view('landing');
     }
 
@@ -50,21 +56,112 @@ class FrontController extends Controller
         return redirect()->route('dashboard');
     }
 
+    public function loginPost(Request $request)
+    {
+        $data = $request->all();
+        $request->validate([
+            'email' => 'required',
+            'password' => 'required',
+        ]);
+        
+        $userCheck = User::where('email', $data['email']);
+
+        if ($userCheck->count() < 1) {
+            // Alert::error('User does not Exist', '');
+            return back();
+        }
+        $user = $userCheck->first();
+
+        $passCheck = Hash::check($data['password'], $user->password); //bool true or false
+
+        if (($userCheck->count() > 0) && ($passCheck)) {
+            Auth::login($user);
+            // Alert::success('Logged In Successfully', '');
+            return redirect()->route('dashboard');
+            //return redirect()->intended('/admin')->withSuccess('Signed in');
+        }
+
+
+        return redirect("admin/login")->withError('Login details are not valid');
+    }
+
+    //create folder in folder
+    public function createfolder(Request $request)
+    {
+        $user = auth()->user();
+        $request->validate([
+            'title' => 'required',
+        ]);
+        $data = $request->all();
+
+        if (empty($data['save_path'])) {
+            $parentFolder = Folder::where(['created_by'=>$user->id, 'title'=>'Main'])->first();
+        }
+
+        $slug = Str::slug($data['title']);
+        $slugPath = $parentFolder->path_by_slug.'/'.$slug;
+        $titlePath = $parentFolder->path_by_title.'/'.$data['title'];
+
+        Storage::disk('public')->makeDirectory($slugPath);
+
+        $folder = new Folder();
+        $folder->unique_key = Str::random(30);
+        $folder->title = $data['title'];
+        $folder->slug = $slug;
+        $folder->created_by = $user->id;
+        $folder->parent_id = $parentFolder->id;
+        $folder->path_by_slug = $slugPath;
+        $folder->path_by_title = $titlePath;
+        $folder->save();
+        return back();
+
+    }
+
     public function uploads()
     {
-        return view('uploads');
+        $user = auth()->user();
+        $folders = $user->folders()->where('parent_id', '!=', NULL)->get();
+        $files = $user->myFiles;
+
+        //merger array, sort by latest
+        $collection = collect([$folders, $files]);
+        $mergedItems = $collection->collapse();
+        $mergedItems = $mergedItems->SortByDesc('created_at');
+
+        return view('uploads', compact('mergedItems'));
     }
+
+    
     
     public function uploadsPost(Request $request)
     {
-        $image = $request->file('file');
-        $imageName = $image->getClientOriginalName();
-        $image->move(public_path('images'),$imageName);
+        $user = auth()->user();
+        $storePath = $request->input('store_path');
+
+        //main folder
+        if (empty($storePath)) {
+            $parentFolder = Folder::where(['created_by'=>$user->id, 'title'=>'Main'])->first();
+            $parentPath = $parentFolder->path_by_slug;
+        }
+
+        //sub-folder
         
-        $imageUpload = new ImageUpload();
-        $imageUpload->filename = $imageName;
-        $imageUpload->save();
-        return response()->json(['success'=>$imageName]);
+        //store in folder
+        $file = $request->file('file');
+        $extension = $file->extension();
+        $fileName = $file->getClientOriginalName();
+        $file->storeAs($parentPath, $fileName, 'public');
+
+        //save files
+        $myFile = new MyFile();
+        $myFile->unique_key = Str::random(30);
+        $myFile->title = $fileName;
+        $myFile->created_by = $user->id;
+        $myFile->type = $extension;
+        $myFile->folder_id = $parentFolder->id;
+        $myFile->save();
+
+        return response()->json(['success'=>$fileName]);
     }
     
 
