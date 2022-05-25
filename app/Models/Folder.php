@@ -19,7 +19,7 @@ class Folder extends Model
     }
 
     public function myFiles(){
-        return $this->belongsTo(MyFile::class);
+        return $this->hasMany(MyFile::class);
     }
 
     public function user(){

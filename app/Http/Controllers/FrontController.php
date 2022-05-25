@@ -23,6 +23,12 @@ class FrontController extends Controller
     public function dashboard()
     {
         // return $user = auth()->user();
+        
+        //Storage::disk('public')->move('tests/old.jpg', 'tests/new.jpg'); //rename file
+        
+        //Storage::disk('public')->makeDirectory($path = $pathToCreate, $mode = 0777, $recursive = true, $force = false);
+
+
         return view('landing');
     }
 
@@ -97,10 +103,10 @@ class FrontController extends Controller
         //main folder
         if (empty($data['save_path'])) {
             $parentFolder = Folder::where(['created_by'=>$user->id, 'title'=>'Main'])->first();
+        } else {
+            //sub-folder
+            $parentFolder = Folder::find($data['save_path']);
         }
-
-        //sub-folder
-        $parentFolder = Folder::find($data['save_path']);
 
         $slug = Str::slug($data['title']);
         $slugPath = $parentFolder->path_by_slug.'/'.$slug;
@@ -121,6 +127,53 @@ class FrontController extends Controller
 
     }
 
+    //rename folder
+    public function renameFolder(Request $request)
+    {
+        $user = auth()->user();
+        $request->validate([
+            'title' => 'required',
+        ]);
+        $data = $request->all();
+
+        $folder = Folder::find($data['save_path']);
+        $parentFolder = Folder::where('id', $folder->parent_id)->first();
+        $titlePath = $parentFolder->path_by_title.'/'.$data['title'];
+        $folder->title = $data['title'];
+        $folder->path_by_title = $titlePath;
+        $folder->save();
+
+        return back();
+    }
+
+    public function renameFile(Request $request)
+    {
+        $user = auth()->user();
+        $request->validate([
+            'file_title' => 'required',
+        ]);
+        $data = $request->all();
+
+        $data = $request->all();
+        $myFile = MyFile::find($data['file_id']);
+        $folderPath = $myFile->folder->path_by_slug;
+        $oldPath = $folderPath.'/'.$myFile->title;
+        $newPath = $folderPath.'/'.$data['file_title'].'/'.$myFile->type;
+
+        //name in storage
+        Storage::disk('public')->move($oldPath, $newPath);
+
+        //update file
+        $myFile->title = $data['file_title'];
+        $myFile->original_name = $data['file_title'];
+        $myFile->save();
+
+        return back();
+
+
+
+    }
+
     //all user folders and files
     public function uploads()
     {
@@ -135,7 +188,9 @@ class FrontController extends Controller
         $mergedItems = $collection->collapse();
         $mergedItems = $mergedItems->SortByDesc('created_at');
 
-        return view('uploads', compact('mergedItems'));
+        $extensionArray = ['jpeg', 'jpg', 'png', 'gif', 'pdf', 'xlx', 'docs'];
+
+        return view('uploads', compact('mergedItems', 'extensionArray'));
     }
 
     public function singleFolder($id)
@@ -147,26 +202,31 @@ class FrontController extends Controller
         $collection = collect([$subfolders, $files]);
         $mergedItems = $collection->collapse();
         $mergedItems = $mergedItems->SortByDesc('created_at');
-        return view('singleFolder', compact('mergedItems', 'folder'));  
+
+        $extensionArray = ['jpeg', 'jpg', 'png', 'gif', 'pdf', 'xlx', 'docs'];
+        return view('singleFolder', compact('mergedItems', 'folder', 'extensionArray'));  
     }
 
     //save files from dropzone
     public function uploadsPost(Request $request)
     {
         $user = auth()->user();
-        $storePath = $request->input('store_path');
+        $storePath = $request->input('store_path'); //this is an id value
 
         //main folder
         if (empty($storePath)) {
             $parentFolder = Folder::where(['created_by'=>$user->id, 'title'=>'Main'])->first();
             $parentPath = $parentFolder->path_by_slug;
+        } else {
+            //sub-folder
+            $parentFolder = Folder::find($storePath);
+            $parentPath = $parentFolder->path_by_slug;
         }
 
-        //sub-folder
-        
         //store in folder
         $file = $request->file('file');
         $extension = $file->extension();
+        $size = $file->getSize();
         $fileName = $file->getClientOriginalName();
         $file->storeAs($parentPath, $fileName, 'public');
 
@@ -174,6 +234,7 @@ class FrontController extends Controller
         $myFile = new MyFile();
         $myFile->unique_key = Str::random(30);
         $myFile->title = $fileName;
+        $myFile->size = $size;
         $myFile->created_by = $user->id;
         $myFile->type = $extension;
         $myFile->folder_id = $parentFolder->id;

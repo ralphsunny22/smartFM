@@ -18,10 +18,11 @@
         justify-content: space-between;
     }
 
-    .each_folder{
+    /* .each_folder{
         width: 100px;
         height: 100px;
-    }
+        cursor: default;
+    } */
     .folder-image{
         max-width: 100%;
         max-height: 100%;
@@ -62,26 +63,14 @@
 @section('content')
 
     @section('extra_header')
-    <svg xmlns="http://www.w3.org/2000/svg" class="d-none">
-        <symbol id="info-fill" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-        </symbol>
-      </svg>
-    <div class="alert alert-primary alert-dismissible d-flex align-items-center mt-4 d-none" role="alert">
-        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Info:"><use xlink:href="#info-fill"/></svg>
-        <div>
-          By default, all uploaded files are stored in your root folder. To save in a another folder(subfolder),
-          open the appropriate folder, before uploading
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    </div>
+    
     @endsection
 
     <!--Container Main start-->
     <div class="height-100 bg-light">
         
         <div class="upload-main">
-            <h5>{{ $folder->path_by_title }}</h5>
+            <h5>Path: /{{$folder->path_by_title}}</h5>
             
             <form method="post" action="{{ route('uploadsPost') }}"
                 enctype="multipart/form-data" class="dropzone" id="my-great-dropzone">@csrf
@@ -91,7 +80,7 @@
                     </div>
                     <h4 class="message">Click or Drop files here to upload</h4>
                 </div>
-                <input type="hidden" name="store_path" value="{{ $folder->id }}">
+                <input type="hidden" name="store_path" value="{{$folder->id}}">
             </form> 
 
             <div class="file-validate">
@@ -101,7 +90,7 @@
 
             <div class="mt-5">
                 <div class="folder-nav">
-                    <h6>All contents</h6>
+                    <h6>All Contents</h6>
                     <button class="add-folder" type="button" style="font-weight: 900" onclick="modalDisplay()">
                         <i class='bx bx-plus' id="header-toggle"></i>
                         Add folder
@@ -125,9 +114,9 @@
                                 <div id="{{ $uniq }}" class="file-actions">
                                     <div class="file-actions-content">
                                         <a href="{{ route('singleFolder', $item->id) }}">Open</a>
-                                        <a href="">Rename</a>
-                                        <a href="javascript:void(0)" class="add-folder"
-                                            onclick="modalDisplay('{{$item->id}}')">+folder</a>
+                                        <a href="javascript:void(0)" class="renameFolder"
+                                            onclick="renameFolderDisplay('{{$item->id}}', '{{ $item->title }}')">Rename</a>
+                                        <a href="javascript:void(0)" class="add-folder" onclick="modalDisplay('{{$item->id}}')">+folder</a>
                                         <a href="">Remove</a>
                                     </div>
                                 </div>
@@ -136,12 +125,16 @@
                         @endif
                         
                         
-                        @if ($item->type == 'jpg')
+                        @if (in_array($item->type, $extensionArray))
                             <div class="each_folder" onclick="showFileActions('{{ $uniq }}')">
                                 <img src="{{ asset('storage/'.$item->folder->path_by_slug.'/'.$item->title) }}" alt="" class="folder-image">
                                 <div id="{{ $uniq }}" class="file-actions">
                                     <div class="file-actions-content">
-                                        <a href="">View</a>
+                                        <a
+                                            href="{{ asset('storage/'.$item->folder->path_by_slug.'/'.$item->title) }}"
+                                            data-fancybox="gallery"
+                                            data-caption="{{ isset($item->original_name) ? $item->original_name : 'no caption'  }}"
+                                        >Preview</a>
                                         <a href="">Rename</a>
                                         <a href="">move</a>
                                         <a href="">Remove</a>
@@ -151,27 +144,6 @@
                         @endif
                     @endforeach
 
-                    {{-- <div class="each_folder">
-                        <div class="mb-1"><i class="bx bx-folder"></i></div>
-                        <p class="subs">Subs: 2</p>
-                        <span class="title">Images</span>
-                    </div> --}}
-
-                    
-
-                    
-
-                    <div class="each_folder">
-                        <img src="/assets/images/img1.jpg" alt="" class="folder-image">
-                        
-                    </div>
-
-                    <div class="each_folder">
-                        <img src="/assets/images/img1.jpg" alt="" class="folder-image">
-                    </div>
-                    
-
-                
                 </div>
 
                 @else
@@ -192,6 +164,23 @@
         <h6>New folder</h6>
         <form action="{{ route('createfolder') }}"  method="POST">@csrf
             <input type="text" name="title" class="form-control" id="" placeholder="Folder name">
+            <input type="hidden" class="save_path" name="save_path" value="{{$folder->id}}">
+            <button type="submit" class="pull-right">Submit</button>
+        </form>
+
+        <div class="save-path mt-3">
+            <p>Save path: /Main</p>
+        </div>
+    </div>
+    
+</div>
+
+<div class="bg-modal renameFolder">
+    <div class="modal-content renameFolder p-5">
+        <div class="close">+</div>
+        <h6>Rename folder</h6>
+        <form action="{{ route('renameFolder') }}"  method="POST">@csrf
+            <input type="text" name="title" class="form-control" id="title" placeholder="Folder name" value="">
             <input type="hidden" class="save_path" name="save_path" value="">
             <button type="submit" class="pull-right">Submit</button>
         </form>
@@ -211,8 +200,9 @@
 <script src="https://cdn.datatables.net/1.12.0/js/jquery.dataTables.min.js"></script>
 <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
 
+
 <script>
-    //save_path is id value
+    //save_path is an id value;
     function modalDisplay ($save_path=""){
         $('.bg-modal').css({'display':'flex'});
         if($save_path != "") {
@@ -225,6 +215,16 @@
         $('.bg-modal').css({'display':'none'});
         $('.bg-modal .save_path').val('');
    })
+
+   //rename folder
+   function renameFolderDisplay ($folder_id="", $folder_old_title=""){
+        $('.renameFolder').css({'display':'flex'});
+        if($folder_id != "") {
+            // $path = $(this).attr("data-path")
+            $('#title').val($folder_old_title)
+            $('.bg-modal .save_path').val($folder_id)
+        } 
+    }
 </script>
 
 <script>
@@ -249,9 +249,15 @@
         acceptedFiles: ".jpeg, .jpg, .png, .gif, .pdf, .docx, .xlx",
         addRemoveLinks: true,
         timeout: 5000,
+        queuecomplete: function(file){
+            location.reload();
+        },
+        
         success: function(file, response) 
         {
-            console.log(response);
+            console.log(response)
+            
+            //if(response) window.location.reload(true);
         },
         error: function(file, response)
         {

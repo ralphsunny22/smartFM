@@ -29,4 +29,6 @@ Route::post('/uploads', [App\Http\Controllers\FrontController::class, 'uploadsPo
 //add folder
 Route::post('/createfolder', [App\Http\Controllers\FrontController::class, 'createfolder'])->name('createfolder');
 Route::get('/folder/{id}', [App\Http\Controllers\FrontController::class, 'singleFolder'])->name('singleFolder');
+Route::post('/renameFolder', [App\Http\Controllers\FrontController::class, 'renameFolder'])->name('renameFolder');
+Route::post('/renameFile', [App\Http\Controllers\FrontController::class, 'renameFile'])->name('renameFile');
 
