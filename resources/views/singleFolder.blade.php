@@ -91,7 +91,8 @@
             <div class="mt-5">
                 <div class="folder-nav">
                     <h6>All Contents</h6>
-                    <button class="add-folder" type="button" style="font-weight: 900" onclick="modalDisplay()">
+                    <button class="add-folder" type="button" style="font-weight: 900"
+                    onclick="modalDisplay('Add Folder', 'createfolder', '', 'Folder name', '{{ $folder->id }}')">
                         <i class='bx bx-plus' id="header-toggle"></i>
                         Add folder
                     </button>
@@ -114,9 +115,15 @@
                                 <div id="{{ $uniq }}" class="file-actions">
                                     <div class="file-actions-content">
                                         <a href="{{ route('singleFolder', $item->id) }}">Open</a>
+
                                         <a href="javascript:void(0)" class="renameFolder"
-                                            onclick="renameFolderDisplay('{{$item->id}}', '{{ $item->title }}')">Rename</a>
-                                        <a href="javascript:void(0)" class="add-folder" onclick="modalDisplay('{{$item->id}}')">+folder</a>
+                                            onclick="modalDisplay('Rename Folder', 'renameFolder', '{{ $item->title }}', 'Folder name', '{{ $item->id }}')">
+                                            Rename</a>
+
+                                        <a href="javascript:void(0)" class="add-folder"
+                                        onclick="modalDisplay('Add Folder', 'createfolder', '', 'Folder name', '{{ $item->id }}')">
+                                            +folder</a>
+
                                         <a href="">Remove</a>
                                     </div>
                                 </div>
@@ -135,11 +142,12 @@
                                             data-fancybox="gallery"
                                             data-caption="{{ isset($item->original_name) ? $item->original_name : 'no caption'  }}"
                                         >Preview</a>
-                                        
-                                        <a href="javascript:void(0)" class="renameFile"
-                                            onclick="renameFileDisplay('{{$item->id}}', '{{ $item->original_name }}')">Rename</a>
 
-                                        <a href="">move</a>
+                                        <a href="javascript:void(0)" class="renameFile"
+                                        onclick="modalDisplay('Rename File', 'renameFile', '{{ $item->original_name ? $item->original_name : '' }}', 'File name', '{{ $item->id}} ')">
+                                            Rename</a>
+
+                                            <a href="{{ route('downloadFile', $item->id) }}">Download</a>
                                         <a href="">Remove</a>
                                     </div>
                                 </div>
@@ -164,22 +172,22 @@
 <div class="bg-modal">
     <div class="modal-content p-5">
         <div class="close">+</div>
-        <h6>New folder</h6>
-        <form action="{{ route('createfolder') }}"  method="POST">@csrf
-            <input type="text" name="title" class="form-control" id="" placeholder="Folder name">
-            <input type="hidden" class="save_path" name="save_path" value="{{$folder->id}}">
+        <h6 class="modal-title"></h6>
+        <form class="modal-form" action=""  method="POST">@csrf
+            <input type="text" name="title" class="form-control input-title" id="" placeholder="">
+            <input type="hidden" class="item_id" name="item_id" value="">
             <button type="submit" class="pull-right">Submit</button>
         </form>
 
         <div class="save-path mt-3">
-            <p>Save path: /Main</p>
+            <p>Save path: /{{$folder->path_by_title}}</p>
         </div>
     </div>
     
 </div>
 
 <!-- Modal rename folder-->
-<div class="bg-modal renameFolder">
+{{-- <div class="bg-modal renameFolder">
     <div class="modal-content renameFolder p-5">
         <div class="close">+</div>
         <h6>Rename folder</h6>
@@ -194,10 +202,10 @@
         </div>
     </div>
     
-</div>
+</div> --}}
 
 <!-- Modal rename file -->
-<div class="bg-modal renameFile">
+{{-- <div class="bg-modal renameFile">
     <div class="modal-content renameFile p-5">
         <div class="close">+</div>
         <h6>Rename file</h6>
@@ -211,7 +219,7 @@
             <p>Save path: /Main</p>
         </div>
     </div> 
-</div>
+</div> --}}
 
 <!--Container Main end-->
 
@@ -224,41 +232,30 @@
 
 <script>
     //save_path is an id value;
-    function modalDisplay ($save_path=""){
+    function modalDisplay ($modal_title="", $route="", $input_value="", $input_placeholder="", $item_id=""){
         $('.bg-modal').css({'display':'flex'});
-        if($save_path != "") {
+        console.log($modal_title);
+        $('.modal-title').text($modal_title);
+        var base_url = window.location.origin; //http://127.0.0.1:8000
+        $('.modal-form').attr('action', base_url+'/'+$route);
+
+        if($input_value != ""){
+            $('.input-title').val($input_value);
+        }
+        $('.input-title').attr('placeholder', $input_placeholder);
+
+        if($item_id != "") {
             // $path = $(this).attr("data-path")
-            $('.bg-modal .save_path').val($save_path)
+            $('.bg-modal .item_id').val($item_id)
         } 
     }
     
     $(".close").click(function(){
         $('.bg-modal').css({'display':'none'});
-        $('.bg-modal .save_path').val('');
+        $('.input-title').val('');
+        $('.bg-modal .item_id').val('');
    })
 
-   //rename folder
-   function renameFolderDisplay ($folder_id="", $folder_old_title=""){
-        $('.renameFolder').css({'display':'flex'});
-        if($folder_id != "") {
-            // $path = $(this).attr("data-path")
-            $('#title').val($folder_old_title)
-            $('.bg-modal .save_path').val($folder_id)
-        } 
-    }
-
-    //rename file
-   function renameFileDisplay ($file_id="", $file_old_title=""){
-        $('.renameFile').css({'display':'flex'});
-        if($file_id != "") {
-            $('.renameFile .file_id').val($file_id)
-        } 
-        if($file_old_title != null) {
-            $('.renameFile .file_title').val($file_old_title)
-        } 
-
-
-   }
 </script>
 
 <script>

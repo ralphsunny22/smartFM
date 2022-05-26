@@ -26,8 +26,9 @@ class FrontController extends Controller
         
         //Storage::disk('public')->move('tests/old.jpg', 'tests/new.jpg'); //rename file
         
-        //Storage::disk('public')->makeDirectory($path = $pathToCreate, $mode = 0777, $recursive = true, $force = false);
-
+        //rename folder
+        // $old = Storage::disk('public')->path('old');
+        // rename($old, 'C:\xampp\htdocs\filemanager\filemanager\storage\app/public\new');
 
         return view('landing');
     }
@@ -101,11 +102,11 @@ class FrontController extends Controller
         $data = $request->all();
 
         //main folder
-        if (empty($data['save_path'])) {
+        if (empty($data['item_id'])) {
             $parentFolder = Folder::where(['created_by'=>$user->id, 'title'=>'Main'])->first();
         } else {
             //sub-folder
-            $parentFolder = Folder::find($data['save_path']);
+            $parentFolder = Folder::find($data['item_id']);
         }
 
         $slug = Str::slug($data['title']);
@@ -136,7 +137,7 @@ class FrontController extends Controller
         ]);
         $data = $request->all();
 
-        $folder = Folder::find($data['save_path']);
+        $folder = Folder::find($data['item_id']);
         $parentFolder = Folder::where('id', $folder->parent_id)->first();
         $titlePath = $parentFolder->path_by_title.'/'.$data['title'];
         $folder->title = $data['title'];
@@ -150,28 +151,28 @@ class FrontController extends Controller
     {
         $user = auth()->user();
         $request->validate([
-            'file_title' => 'required',
+            'title' => 'required',
         ]);
         $data = $request->all();
 
-         $myFile = MyFile::find($data['file_id']);
-         $type = (string) $myFile->type; //'jpg'
+        $myFile = MyFile::find($data['item_id']);
+        $type = (string) $myFile->type; //'jpg'
 
-         $folderPath = (string) $myFile->folder->path_by_slug; //'ugo-sunday-2', img location
+        $folderPath = (string) $myFile->folder->path_by_slug; //'ugo-sunday-2', img location
         $oldFileTitle = (string) $myFile->title;
-          $oldPath = $folderPath.'/'.$oldFileTitle; //'ugo-sunday-2/165346088123232-323329_fashion-.....png'
+        $oldPath = $folderPath.'/'.$oldFileTitle; //'ugo-sunday-2/165346088123232-323329_fashion-.....png'
 
-         $newFileTitle = (string) $data['file_title'];
-         $newPath = $folderPath.'/'.$newFileTitle.'.'.$type; //'ugo-sunday-2/lady.jpg'
+        $newFileTitle = (string) $data['title'];
+        $newPath = $folderPath.'/'.$newFileTitle.'.'.$type; //'ugo-sunday-2/lady.jpg'
 
         //name in storage
         Storage::disk('public')->move($oldPath, $newPath);
 
-        $new_title = $data['file_title'].'.'.$myFile->type; //;lady.jpg
+        $new_title = $data['title'].'.'.$myFile->type; //;lady.jpg
 
         //update file
         $myFile->title = $new_title;
-        $myFile->original_name = $data['file_title'];
+        $myFile->original_name = $data['title'];
         $myFile->save();
 
         return back();
@@ -180,14 +181,40 @@ class FrontController extends Controller
 
     }
 
+    public function downloadFile($id)
+    {
+        $file_id = $id;
+        $file = MyFile::find($file_id);
+        $fileTitle = (string) $file->title;
+        $folderPath = (string) $file->folder->path_by_slug;
+        $filePath = $folderPath.'/'.$fileTitle;
+
+        $filePathToDownload = Storage::disk('public')->path($filePath);
+        // $filex= storage_path()."app/ugo-sunday-2/'.$fileTitle";
+        // if (file_exists($filex)) {
+        //     $headers = [
+        //         'Content-Type' => 'application/png',
+        //     ];
+        //     return response()->download($filex, "{$fileTitle}", $headers);
+        // }
+        $type = $file->type;
+        $newFileName = isset($file->original_name) ? $file->original_name.'.'.$type : 'sfm-item'.'.'.$type;
+
+        $headers = ['Content-Type: application/'.$type];
+        return response()->download($filePathToDownload, $newFileName, $headers);
+
+        
+    }
+
     //all user folders and files
     public function uploads()
     {
+        $base_url = url('/'); //http://127.0.0.1:8000
         $user = auth()->user();
         $user_main_folder = Folder::where(['created_by'=>$user->id, 'parent_id'=>NULL])->first();
 
         $folders = $user_main_folder->folders;
-        $files = $user->myFiles;
+        $files = $user->myFiles()->where('folder_id', $user_main_folder->id)->get();
 
         //merger array, sort by latest
         $collection = collect([$folders, $files]);
@@ -196,7 +223,7 @@ class FrontController extends Controller
 
         $extensionArray = ['jpeg', 'jpg', 'png', 'gif', 'pdf', 'xlx', 'docs'];
 
-        return view('uploads', compact('mergedItems', 'extensionArray'));
+        return view('uploads', compact('mergedItems', 'extensionArray', 'base_url'));
     }
 
     public function singleFolder($id)
