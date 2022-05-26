@@ -201,7 +201,7 @@
                                         Rename</a>
                                             
                                         <a href="{{ route('downloadFile', $item->id) }}">Download</a>
-                                        <a href="">Remove</a>
+                                        <a href="{{ route('deleteFile', $item->id) }}" class="button delete-confirm">Delete</a>
                                     </div>
                                 </div>
                             </div>
@@ -271,17 +271,34 @@
         $('.input-title').val('');
         $('.bg-modal .item_id').val('');
    })
-  
 
+   //deleteFile
+   $('.delete-confirm').on('click', function (event) {
+        event.preventDefault();
+        const url = $(this).attr('href');
+        swal({
+            title: 'Are you sure?',
+            text: 'This file will be permanantly deleted!',
+            icon: 'warning',
+            buttons: ["Cancel", "Yes!"],
+        }).then(function(value) {
+            if (value) {
+                window.location.href = url;
+                swal("Your file has been deleted!", {
+                    icon: "success",
+                });
+                
+            } //else {
+                //swal("Your file is safe!");
+            //}
+        });
+    });
 </script>
 
 <script>
     function showFileActions(uniq) {
         $('#'+uniq).toggle();
     }
-    // $('.each_folder').click(function(e) {
-    //     $('.file-actions').toggle();
-    // });
 </script>
 
 <!--dropZone-->

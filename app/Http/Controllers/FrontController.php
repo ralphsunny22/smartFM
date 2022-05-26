@@ -206,6 +206,20 @@ class FrontController extends Controller
         
     }
 
+    //deleteFile
+    public function deleteFile($id)
+    {
+        $file = MyFile::find($id);
+        $file_title_with_extension = (string) $file->title; //xyz.jpg
+        $folderPath = (string) $file->folder->path_by_slug; // x/y
+
+        $filePath = $folderPath.'/'.$file_title_with_extension; // x/y/xyz.jpg
+
+        Storage::disk('public')->delete($filePath);
+        $file->delete();
+        return back()->with('success','File deleted successfully');
+    }
+
     //all user folders and files
     public function uploads()
     {

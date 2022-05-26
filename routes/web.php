@@ -32,4 +32,5 @@ Route::get('/folder/{id}', [App\Http\Controllers\FrontController::class, 'single
 Route::post('/renameFolder', [App\Http\Controllers\FrontController::class, 'renameFolder'])->name('renameFolder');
 Route::post('/renameFile', [App\Http\Controllers\FrontController::class, 'renameFile'])->name('renameFile');
 Route::get('/downloadFile/{id}', [App\Http\Controllers\FrontController::class, 'downloadFile'])->name('downloadFile');
+Route::get('/deleteFile/{id}', [App\Http\Controllers\FrontController::class, 'deleteFile'])->name('deleteFile');
 
