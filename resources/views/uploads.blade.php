@@ -174,8 +174,6 @@
                                         <a href="javascript:void(0)" class="add-folder"
                                             onclick="modalDisplay('Add Folder', 'createfolder', '', 'Folder name', '{{$item->id}}')">
                                             +folder</a>
-                                            
-                                        <a href="">Remove</a>
                                     </div>
                                 </div>
                             </div>
@@ -292,7 +290,7 @@
                 //swal("Your file is safe!");
             //}
         });
-    });
+   });
 </script>
 
 <script>

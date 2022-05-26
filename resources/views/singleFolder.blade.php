@@ -123,8 +123,6 @@
                                         <a href="javascript:void(0)" class="add-folder"
                                         onclick="modalDisplay('Add Folder', 'createfolder', '', 'Folder name', '{{ $item->id }}')">
                                             +folder</a>
-
-                                        <a href="">Remove</a>
                                     </div>
                                 </div>
                             </div>
@@ -148,7 +146,7 @@
                                             Rename</a>
 
                                             <a href="{{ route('downloadFile', $item->id) }}">Download</a>
-                                        <a href="">Remove</a>
+                                            <a href="{{ route('deleteFile', $item->id) }}" class="button delete-confirm">Delete</a>
                                     </div>
                                 </div>
                             </div>
@@ -186,41 +184,6 @@
     
 </div>
 
-<!-- Modal rename folder-->
-{{-- <div class="bg-modal renameFolder">
-    <div class="modal-content renameFolder p-5">
-        <div class="close">+</div>
-        <h6>Rename folder</h6>
-        <form action="{{ route('renameFolder') }}"  method="POST">@csrf
-            <input type="text" name="title" class="form-control" id="title" placeholder="Folder name" value="">
-            <input type="hidden" class="save_path" name="save_path" value="">
-            <button type="submit" class="pull-right">Submit</button>
-        </form>
-
-        <div class="save-path mt-3">
-            <p>Save path: /Main</p>
-        </div>
-    </div>
-    
-</div> --}}
-
-<!-- Modal rename file -->
-{{-- <div class="bg-modal renameFile">
-    <div class="modal-content renameFile p-5">
-        <div class="close">+</div>
-        <h6>Rename file</h6>
-        <form action="{{ route('renameFile') }}"  method="POST">@csrf
-            <input type="text" name="file_title" class="form-control file_title" id="file_title" placeholder="File name" value="">
-            <input type="hidden" class="file_id" name="file_id" value="">
-            <button type="submit" class="pull-right">Submit</button>
-        </form>
-
-        <div class="save-path mt-3">
-            <p>Save path: /Main</p>
-        </div>
-    </div> 
-</div> --}}
-
 <!--Container Main end-->
 
 @endsection
@@ -256,15 +219,35 @@
         $('.bg-modal .item_id').val('');
    })
 
+   //deleteFile
+   $('.delete-confirm').on('click', function (event) {
+        event.preventDefault();
+        const url = $(this).attr('href');
+        swal({
+            title: 'Are you sure?',
+            text: 'This file will be permanantly deleted!',
+            icon: 'warning',
+            buttons: ["Cancel", "Yes!"],
+        }).then(function(value) {
+            if (value) {
+                window.location.href = url;
+                swal("Your file has been deleted!", {
+                    icon: "success",
+                });
+                
+            } //else {
+                //swal("Your file is safe!");
+            //}
+        });
+   });
+
 </script>
 
 <script>
     function showFileActions(uniq) {
         $('#'+uniq).toggle();
     }
-    // $('.each_folder').click(function(e) {
-    //     $('.file-actions').toggle();
-    // });
+    
 </script>
 
 <!--dropZone-->
