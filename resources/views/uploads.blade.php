@@ -189,11 +189,13 @@
                                 
                                 <div id="{{ $uniq }}" class="file-actions">
                                     <div class="file-actions-content">
+                                        <!--fancybox-->
                                         <a
                                             href="{{ asset('storage/'.$item->folder->path_by_slug.'/'.$item->title) }}"
                                             data-fancybox="gallery"
                                             data-caption="{{ isset($item->original_name) ? $item->original_name : 'no caption'  }}"
                                         >Preview</a>
+
                                         <a href="javascript:void(0)" class="renameFile"
                                         onclick="modalDisplay('Rename File', 'renameFile', '{{ $item->original_name ? $item->original_name : '' }}', 'File name', '{{$item->id}}')">
                                         Rename</a>

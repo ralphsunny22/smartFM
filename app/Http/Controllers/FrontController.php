@@ -22,15 +22,14 @@ class FrontController extends Controller
      */
     public function dashboard()
     {
-        // return $user = auth()->user();
-        
         //Storage::disk('public')->move('tests/old.jpg', 'tests/new.jpg'); //rename file
         
         //rename folder
         // $old = Storage::disk('public')->path('old');
         // rename($old, 'C:\xampp\htdocs\filemanager\filemanager\storage\app/public\new');
-
-        return view('landing');
+        $user = auth()->user();
+        $files = $user->myFiles;
+        return view('landing', compact('files'));
     }
 
     public function login()
@@ -147,6 +146,7 @@ class FrontController extends Controller
         return back();
     }
 
+    //rename File
     public function renameFile(Request $request)
     {
         $user = auth()->user();
@@ -181,23 +181,18 @@ class FrontController extends Controller
 
     }
 
+    //download File
     public function downloadFile($id)
     {
         $file_id = $id;
         $file = MyFile::find($file_id);
-        $fileTitle = (string) $file->title;
-        $folderPath = (string) $file->folder->path_by_slug;
-        $filePath = $folderPath.'/'.$fileTitle;
+        $fileTitle = (string) $file->title; // xyz.jpg
+        $folderPath = (string) $file->folder->path_by_slug; // x/y
+        $filePath = $folderPath.'/'.$fileTitle; // x/y/xyz.jpg
 
         $filePathToDownload = Storage::disk('public')->path($filePath);
-        // $filex= storage_path()."app/ugo-sunday-2/'.$fileTitle";
-        // if (file_exists($filex)) {
-        //     $headers = [
-        //         'Content-Type' => 'application/png',
-        //     ];
-        //     return response()->download($filex, "{$fileTitle}", $headers);
-        // }
-        $type = $file->type;
+        
+        $type = $file->type; //jpg
         $newFileName = isset($file->original_name) ? $file->original_name.'.'.$type : 'sfm-item'.'.'.$type;
 
         $headers = ['Content-Type: application/'.$type];
@@ -206,7 +201,7 @@ class FrontController extends Controller
         
     }
 
-    //deleteFile
+    //delete File
     public function deleteFile($id)
     {
         $file = MyFile::find($id);

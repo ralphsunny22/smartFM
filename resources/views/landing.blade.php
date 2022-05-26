@@ -1,6 +1,15 @@
 @extends('front.layouts.front_design')
 
 @section('extra_css')
+  <style>
+    .action-btns{
+      align-items: center;
+      justify-content: space-between;
+    }
+    .action-btns i{
+      cursor: pointer;
+    }
+  </style>
 @endsection
 
 @section('content')
@@ -66,36 +75,42 @@
           </thead>
 
           <tbody>
-              <tr>
+              @if (count($files))
+                  
+                @foreach ($files as $file)
+                <tr>
                   <td><input type="checkbox" name="" id=""></td>
-                  <td>Img</td>
-                  <td>image.jpg</td>
-                  <td>10kb</td>
-                  <td>images</td>
-                  <td>2/22/22</td>
-                  <td>active</td>
-                  <td><i class="bx bx-show"></i> <i class="bx bx-edit"></i></td>
+
+                  <td style="width: 5%;"><img src="{{ asset('storage/'.$file->folder->path_by_slug.'/'.$file->title) }}"
+                    alt="" class="img-fluid"></td>
+
+                  <td>{{ isset($file->original_name) ? $file->original_name : 'no caption'  }}</td>
+
+                  <td>{{ $file->size / 1024 }}kb</td>
+
+                  <td>{{ $file->folder->title }}</td>
+
+                  <td>{{ $file->created_at }}</td>
+
+                  <td>{{ $file->status ? 'Approved' : 'Unapproved' }}</td>
+
+                  <td class="action-btns">
+
+                    <a
+                      href="{{ asset('storage/'.$file->folder->path_by_slug.'/'.$file->title) }}"
+                      data-fancybox="gallery"
+                      data-caption="{{ isset($file->original_name) ? $file->original_name : 'no caption'  }}"
+                  ><i class="bx bx-show"></i></a>
+
+                    
+                    <i class="bx bx-edit"></i></td>
               </tr>
-              <tr>
-                <td><input type="checkbox" name="" id=""></td>
-                <td>Img</td>
-                <td>image.jpg</td>
-                <td>10kb</td>
-                <td>images</td>
-                <td>2/22/22</td>
-                <td>active</td>
-                <td><i class="bx bx-show"></i> <i class="bx bx-edit"></i></td>
-            </tr>
-            <tr>
-              <td><input type="checkbox" name="" id=""></td>
-              <td>Img</td>
-              <td>image.jpg</td>
-              <td>10kb</td>
-              <td>images</td>
-              <td>2/22/22</td>
-              <td>active</td>
-              <td><i class="bx bx-show"></i> <i class="bx bx-edit"></i></td>
-          </tr>
+                @endforeach
+                  
+              @endif
+              
+              
+            
           </tbody>
 
           <tfoot>
