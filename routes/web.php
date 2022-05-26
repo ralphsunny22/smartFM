@@ -39,3 +39,8 @@ Route::get('/files', [App\Http\Controllers\FrontController::class, 'files'])->na
 Route::get('/singleFile/{id}', [App\Http\Controllers\FrontController::class, 'singleFile'])->name('singleFile');
 Route::post('/singleFile/{id}', [App\Http\Controllers\FrontController::class, 'singleFileEdit'])->name('singleFileEdit');
 
+//admin
+Route::get('/admin/dashboard', [App\Http\Controllers\AdminController::class, 'adminDashboard'])->name('adminDashboard');
+Route::get('/admin/files', [App\Http\Controllers\AdminController::class, 'adminFiles'])->name('adminFiles');
+Route::get('/admin/users', [App\Http\Controllers\AdminController::class, 'adminUsers'])->name('adminUsers');
+Route::get('/admin/folders', [App\Http\Controllers\AdminController::class, 'adminFolders'])->name('adminFolders');

@@ -22,11 +22,6 @@ class FrontController extends Controller
      */
     public function dashboard()
     {
-        //Storage::disk('public')->move('tests/old.jpg', 'tests/new.jpg'); //rename file
-        
-        //rename folder
-        // $old = Storage::disk('public')->path('old');
-        // rename($old, 'C:\xampp\htdocs\filemanager\filemanager\storage\app/public\new');
         $user = auth()->user();
         $files = $user->myFiles;
         return view('landing', compact('files'));
@@ -150,13 +145,16 @@ class FrontController extends Controller
 
         if (($userCheck->count() > 0) && ($passCheck)) {
             Auth::login($user);
+
+            if ($user->type==='admin') {
+                return redirect()->route('adminDashboard');
+            }
             // Alert::success('Logged In Successfully', '');
             return redirect()->route('dashboard');
             //return redirect()->intended('/admin')->withSuccess('Signed in');
         }
 
-
-        return redirect("admin/login")->withError('Login details are not valid');
+        return redirect("/login")->withError('Login details are not valid');
     }
 
     //create folder in folder
@@ -396,6 +394,10 @@ class FrontController extends Controller
      */
     public function destroy($id)
     {
-        //
+        ////Storage::disk('public')->move('tests/old.jpg', 'tests/new.jpg'); //rename file
+        
+        //rename folder
+        // $old = Storage::disk('public')->path('old');
+        // rename($old, 'C:\xampp\htdocs\filemanager\filemanager\storage\app/public\new');
     }
 }
