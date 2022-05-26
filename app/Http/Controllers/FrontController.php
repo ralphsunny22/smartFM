@@ -32,6 +32,14 @@ class FrontController extends Controller
         return view('landing', compact('files'));
     }
 
+    public function files()
+    {
+        $user = auth()->user();
+        $files = $user->myFiles;
+        return view('files', compact('files'));
+
+    }
+
     public function singleFile($id)
     {
         $file = MyFile::find($id);
