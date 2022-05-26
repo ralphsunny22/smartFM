@@ -32,6 +32,66 @@ class FrontController extends Controller
         return view('landing', compact('files'));
     }
 
+    public function singleFile($id)
+    {
+        $file = MyFile::find($id);
+        return view('singleFile', compact('file'));
+    }
+
+    public function singleFileEdit(Request $request, $id)
+    {
+        $data = $request->all();
+
+        if(empty($data['title'])){
+            return back();
+        }
+
+        $myFile = MyFile::find($id);
+        $folderPath = (string) $myFile->folder->path_by_slug; //'x/y', img location
+
+        $oldFileTitle = (string) $myFile->title; //'xyz.jpg'
+        $oldPath = $folderPath.'/'.$oldFileTitle; //'x/y/xyz.jpg'
+        
+        if($request->file){
+            //delete old file
+            Storage::disk('public')->delete($oldPath);
+            
+            //store newfile in folder
+            $new_file = $request->file('file');
+            $new_extension = $new_file->extension();
+            $new_title_with_extension = $data['title'].'.'.$new_extension; //lady.jpg
+            $new_size = $new_file->getSize();
+           
+            $new_file->storeAs($folderPath, $new_title_with_extension, 'public');
+
+            //save file
+            $myFile->title = $new_title_with_extension;
+            $myFile->original_name = $data['title'];
+            $myFile->size = $new_size;
+            $myFile->type = $new_extension;
+            $myFile->save();
+
+            return back();
+        }
+
+        $type = (string) $myFile->type; //'jpg'
+        
+        $newFileTitle = (string) $data['title'];
+        $newPath = $folderPath.'/'.$newFileTitle.'.'.$type; //'x/y/lady.jpg'
+
+        $new_title = $data['title'].'.'.$myFile->type; //;lady.jpg
+
+        //rename in storage
+        Storage::disk('public')->move($oldPath, $newPath);
+
+        //update file
+        $myFile->title = $new_title;
+        $myFile->original_name = $data['title'];
+        $myFile->save();
+
+        return back();
+    }
+
     public function login()
     {
         return view('login');

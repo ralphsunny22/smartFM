@@ -92,7 +92,7 @@ button.add-folder {
     cursor: pointer;
 }
 
-.modal-content button{
+.modal-content button, #file-btn{
     border: 0;
     background-color: var(--first-color);
     padding: 7px;

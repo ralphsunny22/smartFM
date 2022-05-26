@@ -86,7 +86,7 @@
 
                   <td>{{ isset($file->original_name) ? $file->original_name : 'no caption'  }}</td>
 
-                  <td>{{ $file->size / 1024 }}kb</td>
+                  <td>{{ round($file->size / 1024 ) }}kb</td>
 
                   <td>{{ $file->folder->title }}</td>
 
@@ -103,7 +103,7 @@
                   ><i class="bx bx-show"></i></a>
 
                     
-                    <i class="bx bx-edit"></i></td>
+                    <a href="{{ route('singleFile', $file->id) }}"><i class="bx bx-edit"></i></a></td>
               </tr>
                 @endforeach
                   
