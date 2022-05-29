@@ -44,3 +44,12 @@ Route::get('/admin/dashboard', [App\Http\Controllers\AdminController::class, 'ad
 Route::get('/admin/files', [App\Http\Controllers\AdminController::class, 'adminFiles'])->name('adminFiles');
 Route::get('/admin/users', [App\Http\Controllers\AdminController::class, 'adminUsers'])->name('adminUsers');
 Route::get('/admin/folders', [App\Http\Controllers\AdminController::class, 'adminFolders'])->name('adminFolders');
+
+Route::get('/admin/roles', [App\Http\Controllers\AdminController::class, 'adminRoles'])->name('adminRoles');
+Route::get('/admin/add-roles', [App\Http\Controllers\AdminController::class, 'adminAddRoles'])->name('adminAddRoles');
+Route::post('/admin/add-roles', [App\Http\Controllers\AdminController::class, 'adminAddRolesPost'])->name('adminAddRolesPost');
+Route::get('/admin/add-permissions/{role_id}', [App\Http\Controllers\AdminController::class, 'adminAddPermissions'])->name('adminAddPermissions');
+Route::post('/admin/add-permissions/{role_id}', [App\Http\Controllers\AdminController::class, 'adminAddPermissionsPost'])->name('adminAddPermissionsPost');
+Route::get('/admin/assign-user-role-permission/{user_id}', [App\Http\Controllers\AdminController::class, 'adminAssignUserRolePermission'])->name('adminAssignUserRolePermission');
+Route::post('/admin/assign-user-role-permission/{user_id}', [App\Http\Controllers\AdminController::class, 'adminAssignUserRolePermissionPost'])->name('adminAssignUserRolePermissionPost');
+Route::post('/admin/remove-user-role-permission/{user_id}', [App\Http\Controllers\AdminController::class, 'adminRemoveUserRolePermission'])->name('adminRemoveUserRolePermission');

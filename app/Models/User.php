@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -14,7 +15,7 @@ use App\Models\Folder;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -76,5 +77,23 @@ class User extends Authenticatable
     }
     public function myFiles(){
         return $this->hasMany(MyFile::class, 'created_by');
+    }
+
+    // public function permissions(){
+    //     return $this->belongsToMany(Permission::class, 'user_permissions');
+    // }
+
+    public static function not_user_permissions($permission_id, $user_id){
+        $user = User::find($user_id);
+        $user_perms = $user->getDirectPermissions();
+        foreach($user_perms as $perm){
+            $user_perms_ids[] = $perm->id; //[1,2]
+        }
+
+        if (in_array($permission_id, $user_perms_ids)) {
+            return true;
+        }
+        return false;
+        
     }
 }

@@ -58,11 +58,10 @@
 
                   <td class="action-btns">
 
-                    <a href="" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Add Role & Permission">
+                    <a href="{{ route('adminAssignUserRolePermission', $user->id) }}" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Assign Role & Permission">
                         <i class="bx bx-plus"></i></a>
 
-                    
-                    <a href=""><i class="bx bx-edit"></i></a></td>
+                    <a href="" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit"><i class="bx bx-edit"></i></a></td>
               </tr>
                 @endforeach
                   
@@ -95,5 +94,13 @@
 @endsection
 
 @section('extra_js')
+
+<script>
+  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+  var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl)
+  })
+</script>
+
 @endsection
 

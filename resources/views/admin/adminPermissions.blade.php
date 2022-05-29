@@ -63,7 +63,7 @@
                 <tr>
                   <td><input type="checkbox" name="" id=""></td>
 
-                  <td>{{ $role->name }}</td>
+                  <td>{{ $role->title }}</td>
 
                   <td>{{ $role->permissions  }}</td>
 
@@ -108,13 +108,5 @@
 @endsection
 
 @section('extra_js')
-
-<script>
-  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-  var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-    return new bootstrap.Tooltip(tooltipTriggerEl)
-  })
-</script>
-
 @endsection
 
